@@ -89,9 +89,11 @@ QDateTime AlarmDataAdapter::date() const
 }
 bool AlarmDataAdapter::setDate(const QDateTime &date)
 {
-    if (this->date() == date) {
-        return false;
-    }
+    // Disable this check to allow forcably updating the the date
+    //if (this->date() == date) {
+    //    return false;
+    //}
+
     QDateTime dt = AlarmUtils::normalizeDate(date);
     if (AlarmsAdapter::get()->manager->managerName() == alarmManager) {
         // use invalid timezone to simulate floating time for EDS backend
@@ -215,6 +217,10 @@ void AlarmDataAdapter::save()
     if (event.id().managerUri().isEmpty()) {
         changes = AlarmManager::AllFields;
     }
+
+    // Force a date update
+    setDate(date());
+
     QOrganizerItemSaveRequest *saveRequest = new QOrganizerItemSaveRequest(q_ptr);
     saveRequest->setItem(event);
     request = saveRequest;
@@ -372,6 +378,9 @@ void AlarmDataAdapter::setData(const QOrganizerTodo &data)
     default:
         alarmType = UCAlarm::OneTime;
         dow = dayOfWeek(date());
+
+        // Force a date update
+        setDate(date());
         break;
     }
 }
